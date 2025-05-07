@@ -1,12 +1,19 @@
+# File: backend/routers/relatorio.py 
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from backend.db import get_db  # ✅ corrigido
 from backend.database.models import Aluno, NotaMensal  # ✅ corrigido
 from backend.schemas import RelatorioMensalOut  # ✅ corrigido
+from pydantic import BaseModel
+from datetime import datetime
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/relatorio",
+    tags=["relatorio"]
+)
 
-@router.get("/relatorio/{aluno_id}", response_model=RelatorioMensalOut)
+@router.get("/{aluno_id}", response_model=RelatorioMensalOut)
 def gerar_relatorio(aluno_id: int, db: Session = Depends(get_db)):
     aluno = db.query(Aluno).filter(Aluno.id == aluno_id).first()
     if not aluno:
@@ -32,6 +39,20 @@ def gerar_relatorio(aluno_id: int, db: Session = Depends(get_db)):
         media_geral=media_geral,
         mensagem_motivacional=mensagem
     )
+
+# ✅ Novo resumo diário
+class ResumoDiarioOut(BaseModel):
+    data: str
+    mensagem: str
+
+@router.get("/resumo/{aluno_id}", response_model=ResumoDiarioOut)
+def resumo_diario(aluno_id: int):
+    # Simulação de mensagem motivacional para o dia
+    return {
+        "data": datetime.today().strftime("%Y-%m-%d"),
+        "mensagem": f"Resumo do dia para o aluno {aluno_id}: Estudo realizado com sucesso e foco mantido! 📚"
+    }
+
 
 
 

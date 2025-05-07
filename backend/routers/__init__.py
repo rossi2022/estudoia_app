@@ -1,6 +1,7 @@
 from . import (
     aluno,
     auth,
+    auth_professor,  # ✅ Adicionado corretamente aqui
     progresso,
     perguntas,
     prova,
@@ -19,6 +20,8 @@ from . import (
     responder,
     respostas
 )
-# ❌ Remova a linha que importa 'personalizadas' aqui.
+
+
+
 
 

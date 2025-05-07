@@ -1,20 +1,21 @@
+# backend/utils/avaliador_audio.py
+
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
-import base64
 
 # 🔐 Carrega a chave da OpenAI do .env
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# 🔍 Função que avalia a fluência e entonação a partir de um arquivo de áudio
-def avaliar_leitura_por_audio(caminho_audio: str) -> str:
+# ✅ Função compatível com import: avaliar_leitura_voz
+def avaliar_leitura_voz(caminho_audio: str) -> str:
     try:
         # 📤 Lê o conteúdo do arquivo em bytes
         with open(caminho_audio, "rb") as f:
             audio_bytes = f.read()
 
-        # ✅ Envia para o Whisper (modelo de transcrição)
+        # ✅ Transcreve com Whisper
         transcript = client.audio.transcriptions.create(
             model="whisper-1",
             file=audio_bytes,
@@ -23,7 +24,7 @@ def avaliar_leitura_por_audio(caminho_audio: str) -> str:
 
         texto_transcrito = transcript.strip()
 
-        # 🧠 Envia para a IA avaliar a fluência e entonação do texto lido
+        # 🧠 Gera avaliação com IA
         prompt = (
             f"O seguinte texto foi lido por um aluno:\n\n\"{texto_transcrito}\"\n\n"
             "Avalie a fluência, entonação e clareza da leitura como se fosse um professor de português. "
@@ -44,3 +45,4 @@ def avaliar_leitura_por_audio(caminho_audio: str) -> str:
 
     except Exception as e:
         return f"Erro ao avaliar áudio: {str(e)}"
+

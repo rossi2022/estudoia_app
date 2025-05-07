@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+
 from backend.db import get_db
 from backend.database.models import Aluno, NotaMensal, Recompensa
 from backend.schemas import RecompensaOut, RecompensaCreate
 
-router = APIRouter(prefix="/recompensas", tags=["Recompensas"])
+router = APIRouter(prefix="/recompensas", tags=["recompensas"])
 
 # 🔹 ROTA GET já existente (mantida exatamente como estava)
 @router.get("/{aluno_id}", response_model=RecompensaOut)
@@ -56,5 +57,6 @@ def criar_recompensa(recompensa: RecompensaCreate, db: Session = Depends(get_db)
     db.commit()
     db.refresh(nova)
     return nova
+
 
 

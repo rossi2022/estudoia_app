@@ -50,4 +50,15 @@ def concluir_trilha(trilha_id: int, db: Session = Depends(get_db)):
     db.refresh(trilha)
     return trilha
 
-
+# 🔸 Recuperar meta de estudo (última trilha criada)
+@router.get("/trilha/meta/{aluno_id}", response_model=TrilhaOut)
+def obter_meta_estudo(aluno_id: int, db: Session = Depends(get_db)):
+    trilha = (
+        db.query(TrilhaAprendizado)
+        .filter(TrilhaAprendizado.aluno_id == aluno_id)
+        .order_by(TrilhaAprendizado.data_criacao.desc())
+        .first()
+    )
+    if not trilha:
+        raise HTTPException(status_code=404, detail="Nenhuma trilha encontrada")
+    return trilha

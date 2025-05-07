@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Float, Date, Text, DateTime
+from sqlalchemy import Column, Integer, String, Text, Date, DateTime, Float, ForeignKey
 from sqlalchemy.orm import relationship
-from backend.db import Base
+from backend.db import Base  # ✅ CORRETO
 from datetime import date, datetime
 
 # ===============================
@@ -14,20 +14,23 @@ class Aluno(Base):
     email = Column(String, unique=True, nullable=False)
     senha = Column(String, nullable=False)
     foto_url = Column(String, nullable=True)
+    meta_estudo = Column(String, nullable=True)  # ✅ Campo necessário para a meta
 
-    respostas = relationship("RespostaAluno", back_populates="aluno")
-    provas = relationship("Prova", back_populates="aluno")
-    notas = relationship("NotaMensal", back_populates="aluno")
-    recompensas = relationship("Recompensa", back_populates="aluno")
-    medalhas = relationship("Medalha", back_populates="aluno")
-    historico = relationship("HistoricoDesempenho", back_populates="aluno")
-    trilha = relationship("TrilhaAprendizado", back_populates="aluno")
-    trilhas_estudo = relationship("TrilhaDeEstudo", back_populates="aluno")
-    escritas = relationship("EscritaCriativa", back_populates="aluno")
-    estudos_diarios = relationship("EstudoDiario", back_populates="aluno")
-    conquistas = relationship("Conquista", back_populates="aluno")
-    resumos = relationship("Resumo", back_populates="aluno")
-    tarefas_estudo = relationship("TarefaEstudo", back_populates="aluno")
+    respostas = relationship("RespostaAluno", back_populates="aluno", lazy="joined")
+    provas = relationship("Prova", back_populates="aluno", lazy="joined")
+    notas = relationship("NotaMensal", back_populates="aluno", lazy="joined")
+    recompensas = relationship("Recompensa", back_populates="aluno", lazy="joined")
+    medalhas = relationship("Medalha", back_populates="aluno", lazy="joined")
+    historico = relationship("HistoricoDesempenho", back_populates="aluno", lazy="joined")
+    trilha = relationship("TrilhaAprendizado", back_populates="aluno", lazy="joined")
+    trilhas_estudo = relationship("TrilhaDeEstudo", back_populates="aluno", lazy="joined")
+    escritas = relationship("EscritaCriativa", back_populates="aluno", lazy="joined")
+    estudos_diarios = relationship("EstudoDiario", back_populates="aluno", lazy="joined")
+    conquistas = relationship("Conquista", back_populates="aluno", lazy="joined")
+    resumos = relationship("Resumo", back_populates="aluno", lazy="joined")
+    tarefas_estudo = relationship("TarefaEstudo", back_populates="aluno", lazy="joined")
+# (...demais modelos permanecem inalterados...)
+
 
 # ===============================
 # 📌 MODELO: Pergunta
@@ -69,8 +72,10 @@ class NotaMensal(Base):
     materia = Column(String, nullable=False)
     nota = Column(Float, nullable=False)
     mes = Column(String, nullable=False)
+    ano = Column(Integer, default=date.today().year)  # ✅ Adicionado campo "ano"
 
     aluno = relationship("Aluno", back_populates="notas")
+
 
 # ===============================
 # 📌 MODELO: Prova + Questões + Respostas
@@ -86,15 +91,16 @@ class Prova(Base):
     conteudo = Column(Text, nullable=False)
 
     aluno = relationship("Aluno", back_populates="provas")
-    questoes = relationship("QuestaoProva", back_populates="prova")
-    respostas = relationship("RespostaProva", back_populates="prova")
-    alertas = relationship("AlertaProva", back_populates="prova")
+    questoes = relationship("QuestaoProva", back_populates="prova", cascade="all, delete-orphan")
+    respostas = relationship("RespostaProva", back_populates="prova", cascade="all, delete-orphan")
+    alertas = relationship("AlertaProva", back_populates="prova", cascade="all, delete-orphan")
 
     @property
     def materia(self):
-        if self.questoes and self.questoes[0].pergunta:
-            return self.questoes[0].pergunta.materia
+        if self.questoes and hasattr(self.questoes[0], 'materia'):
+            return self.questoes[0].materia
         return "Desconhecida"
+
 
 class QuestaoProva(Base):
     __tablename__ = "questoes_prova"
@@ -105,6 +111,8 @@ class QuestaoProva(Base):
 
     prova = relationship("Prova", back_populates="questoes")
     pergunta = relationship("Pergunta", back_populates="questoes_prova")
+    respostas = relationship("RespostaProva", back_populates="questao", cascade="all, delete-orphan")
+
 
 class RespostaProva(Base):
     __tablename__ = "respostas_prova"
@@ -112,10 +120,13 @@ class RespostaProva(Base):
     id = Column(Integer, primary_key=True, index=True)
     prova_id = Column(Integer, ForeignKey("provas.id"), nullable=False)
     pergunta_id = Column(Integer, ForeignKey("perguntas.id"), nullable=False)
+    questao_id = Column(Integer, ForeignKey("questoes_prova.id"), nullable=True)
     resposta_dada = Column(String, nullable=False)
     correta = Column(String, nullable=False)
 
     prova = relationship("Prova", back_populates="respostas")
+    questao = relationship("QuestaoProva", back_populates="respostas")
+
 
 # ===============================
 # 📌 MODELO: Recompensa
@@ -160,7 +171,7 @@ class HistoricoDesempenho(Base):
 
     aluno = relationship("Aluno", back_populates="historico")
 
-# ===============================
+# # ===============================
 # 📌 MODELO: Trilha de Aprendizado
 # ===============================
 class TrilhaAprendizado(Base):
@@ -172,7 +183,7 @@ class TrilhaAprendizado(Base):
     descricao = Column(String, nullable=True)
     habilidade = Column(String, nullable=False)
     status = Column(String, default="pendente")
-    data_criacao = Column(Date, default=date.today)
+    data_criacao = Column(DateTime, default=datetime.utcnow)  # ✅ atualizado
 
     aluno = relationship("Aluno", back_populates="trilha")
 
@@ -235,17 +246,6 @@ class Conquista(Base):
     data_conquista = Column(Date, default=date.today)
 
     aluno = relationship("Aluno", back_populates="conquistas")
-
-# ===============================
-# 📌 MODELO: Apostila
-# ===============================
-class Apostila(Base):
-    __tablename__ = "apostilas"
-
-    id = Column(Integer, primary_key=True, index=True)
-    materia = Column(String, nullable=False)
-    titulo = Column(String, nullable=False)
-    conteudo = Column(String, nullable=False)
 
 # ===============================
 # 📌 MODELO: Resumo
@@ -344,8 +344,34 @@ class TarefaEstudo(Base):
 
     aluno = relationship("Aluno", back_populates="tarefas_estudo")
 
+# ===============================
+# 📌 MODELO: Agenda de Estudos
+# ===============================
+class AgendaEstudo(Base):
+    __tablename__ = "agendas_estudo"
 
+    id = Column(Integer, primary_key=True, index=True)
+    aluno_id = Column(Integer, ForeignKey("alunos.id"), nullable=False)
+    data_gerada = Column(Date, default=date.today)
+    sugestao = Column(Text, nullable=False)
 
+    aluno = relationship("Aluno")
+
+class Materia(Base):
+    __tablename__ = "materias"
+    id = Column(Integer, primary_key=True, index=True)
+    nome = Column(String, unique=True, nullable=False)
+    apostila_url = Column(String, nullable=True)
+
+# 📚 MODELO: Apostila
+class Apostila(Base):
+    __tablename__ = "apostilas"
+
+    id = Column(Integer, primary_key=True, index=True)
+    materia = Column(String, nullable=False)
+    capitulo = Column(String, nullable=False)
+    titulo = Column(String, nullable=False)
+    conteudo = Column(Text, nullable=False)
 
 
 

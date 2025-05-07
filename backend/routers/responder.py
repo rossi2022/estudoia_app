@@ -1,3 +1,5 @@
+# File: backend/routers/responder.py
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from backend.db import get_db
@@ -57,4 +59,3 @@ def adicionar_questao(questao: QuestaoCreate, db: Session = Depends(get_db)):
 @router.get("/", response_model=List[ProvaOut])
 def listar_provas(db: Session = Depends(get_db)):
     return db.query(Prova).all()
-

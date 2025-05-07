@@ -8,7 +8,8 @@ from datetime import date
 from collections import defaultdict
 
 router = APIRouter(
-    tags=["Progresso"]
+    prefix="/progresso",  # ✅ Adicionado prefixo para funcionar em /api/progresso
+    tags=["progresso"]
 )
 
 # 🔹 Schema para criar progresso
@@ -64,6 +65,27 @@ def listar_progresso(aluno_id: int, db: Session = Depends(get_db)) -> Dict[str, 
         for materia, vals in notas_por_mat.items()
     }
     return medias
+
+# 🔹 Listar progresso geral (nota média total)
+@router.get("/geral/{aluno_id}")
+def progresso_geral(aluno_id: int, db: Session = Depends(get_db)):
+    historico = (
+        db.query(HistoricoDesempenho)
+          .filter(HistoricoDesempenho.aluno_id == aluno_id)
+          .all()
+    )
+
+    total_acertos = sum(h.acertos for h in historico)
+    total_erros = sum(h.erros for h in historico)
+    total = total_acertos + total_erros
+
+    if total == 0:
+        return {"media_geral": 0.0}
+
+    media = round((total_acertos / total) * 10, 2)
+    return {"media_geral": media}
+
+
 
 
 

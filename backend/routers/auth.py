@@ -1,60 +1,58 @@
-# File: backend/routers/auth.py
-
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from jose import jwt
+from datetime import datetime, timedelta
 from backend.db import get_db
-from backend.database.models import Aluno
-from backend.schemas import AlunoCreate, AlunoOut, LoginData, LoginResponse
+from backend.database.models import Aluno  # ✅ Corrigido: import da pasta database
+from backend.utils.security import verify_password, criar_token  # ✅ Usa utilitários já centralizados
 
+# =============================
+# 🔹 Inicialização do roteador
+# =============================
 router = APIRouter(
     prefix="/auth",
-    tags=["auth"]
+    tags=["Autenticação"]
 )
 
-# 🔹 CADASTRO DE ALUNO
-@router.post(
-    "/",
-    response_model=AlunoOut,
-    status_code=status.HTTP_201_CREATED
-)
-def cadastrar_aluno(aluno: AlunoCreate, db: Session = Depends(get_db)):
-    if db.query(Aluno).filter(Aluno.email == aluno.email).first():
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email já cadastrado.")
-    novo = Aluno(
-        nome=aluno.nome,
-        email=aluno.email,
-        senha=aluno.senha,
-        foto_url=aluno.foto_url or ""
-    )
-    db.add(novo)
-    db.commit()
-    db.refresh(novo)
-    return novo
+# =============================
+# 🔸 Schemas de entrada e saída
+# =============================
+class LoginData(BaseModel):
+    email: str
+    senha: str
 
-# 🔹 LOGIN DE ALUNO
-@router.post(
-    "/login",
-    response_model=LoginResponse,
-    status_code=status.HTTP_200_OK
-)
-def login_aluno(creds: LoginData, db: Session = Depends(get_db)):
-    aluno = db.query(Aluno).filter(
-        Aluno.email == creds.email,
-        Aluno.senha == creds.senha
-    ).first()
-    if not aluno:
+class LoginResponse(BaseModel):
+    message: str
+    aluno_id: int
+    nome: str
+    token: str
+
+# =============================
+# 🔸 Endpoint de login
+# =============================
+@router.post("/login", response_model=LoginResponse)
+def login(data: LoginData, db: Session = Depends(get_db)):
+    aluno = db.query(Aluno).filter(Aluno.email == data.email).first()
+
+    if not aluno or not verify_password(data.senha, aluno.senha):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Credenciais inválidas."
+            detail="Credenciais inválidas"
         )
-    # Gere um token de verdade aqui; usamos um dummy por enquanto
-    token = "fake-jwt-token"
-    return LoginResponse(
-        message="Login bem-sucedido",
-        aluno_id=aluno.id,
-        nome=aluno.nome,
-        token=token
-    )
+
+    token = criar_token({
+        "sub": aluno.id,
+        "tipo": "aluno"  # ✅ Adicionado para compatibilidade com verificação unificada
+    })
+
+    return {
+        "message": "Login bem-sucedido",
+        "aluno_id": aluno.id,
+        "nome": aluno.nome,
+        "token": token
+    }
+
 
 
 

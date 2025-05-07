@@ -1,34 +1,76 @@
-# backend/routers/responder_prova.py
+# File: backend/routers/responder_prova.py
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from backend.db import get_db
-from backend.database.models import ProvaPersonalizada, Trabalho
+from backend.database.models import Prova, RespostaProva
+from pydantic import BaseModel
+from typing import List
 
 router = APIRouter(
-    prefix="/estudos",
-    tags=["Responder Provas"]
+    prefix="/responder-prova",
+    tags=["Responder Prova"]
 )
 
-# 📚 Enviar Respostas de uma Prova
-@router.post("/provas/{prova_id}/responder")
-def responder_prova(prova_id: int, respostas: dict, db: Session = Depends(get_db)):
-    prova = db.query(ProvaPersonalizada).filter(ProvaPersonalizada.id == prova_id).first()
+# 🔹 Modelo de entrada
+class RespostaProvaIn(BaseModel):
+    prova_id: int
+    pergunta_id: int
+    resposta_aluno: str
+    correta: bool
 
+# 🔹 Modelo de saída
+class RespostaProvaOut(BaseModel):
+    id: int
+    prova_id: int
+    pergunta_id: int
+    resposta_aluno: str
+    correta: bool
+
+    class Config:
+        from_attributes = True
+
+# 🔸 Enviar respostas da prova
+@router.post("/", response_model=RespostaProvaOut)
+def responder_prova(resposta: RespostaProvaIn, db: Session = Depends(get_db)):
+    prova = db.query(Prova).filter(Prova.id == resposta.prova_id).first()
     if not prova:
-        raise HTTPException(status_code=404, detail="Prova não encontrada.")
+        raise HTTPException(status_code=404, detail="Prova não encontrada")
 
-    # 📌 OBS: Aqui seria a lógica para comparar as respostas (não implementado ainda porque depende de como você quer armazenar as questões)
-    # Por enquanto, vamos só simular:
-    total_questoes = len(respostas)
-    acertos_simulados = int(total_questoes * 0.8)  # 📌 Simulando 80% de acertos para teste
+    nova = RespostaProva(
+        prova_id=resposta.prova_id,
+        pergunta_id=resposta.pergunta_id,
+        resposta_dada=resposta.resposta_aluno,
+        correta="sim" if resposta.correta else "não"
+    )
 
-    nota_final = (acertos_simulados / total_questoes) * 10
+    try:
+        db.add(nova)
+        db.commit()
+        db.refresh(nova)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Erro ao salvar resposta: {str(e)}")
 
-    return {
-        "mensagem": "Prova respondida!",
-        "prova_id": prova_id,
-        "total_questoes": total_questoes,
-        "acertos": acertos_simulados,
-        "nota_final": round(nota_final, 2)
-    }
+    return RespostaProvaOut(
+        id=nova.id,
+        prova_id=nova.prova_id,
+        pergunta_id=nova.pergunta_id,
+        resposta_aluno=nova.resposta_dada,
+        correta=nova.correta.strip().lower() == "sim"
+    )
+
+# 🔸 Listar respostas de uma prova
+@router.get("/{prova_id}", response_model=List[RespostaProvaOut])
+def listar_respostas(prova_id: int, db: Session = Depends(get_db)):
+    respostas = db.query(RespostaProva).filter(RespostaProva.prova_id == prova_id).all()
+    return [
+        RespostaProvaOut(
+            id=r.id,
+            prova_id=r.prova_id,
+            pergunta_id=r.pergunta_id,
+            resposta_aluno=r.resposta_dada,
+            correta=r.correta.strip().lower() == "sim"
+        )
+        for r in respostas
+    ]

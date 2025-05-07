@@ -2,55 +2,111 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Dashboard EstudoIA</title>
+  <title>Dashboard do Aluno</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ✅ Chart.js para gráficos -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- ✅ Lucide para ícones -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- ✅ Fonte do Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- ✅ CSS Externo -->
+  <link rel="stylesheet" href="/static/css/style.css" />
 </head>
 <body>
-  <header>
-    <h1 id="nome">Carregando...</h1>
-    <p id="email"></p>
-    <button id="logout-btn">Logout</button>
-  </header>
 
-  <canvas id="chart-progresso"></canvas>
-  <div id="conquistas-container"></div>
-  <div id="resumos-container"></div>
+  <h1>Bem-vindo(a) ao seu Painel de Desempenho 📊</h1>
 
-  <!-- scripts: note o leading slash -->
-  <script src="/scripts/script_dashboard.js"></script>
-  <script src="/scripts/script_progresso.js"></script>
-  <script src="/scripts/script_resumos.js"></script>
-  <script src="/scripts/script_logout.js"></script>
+  <div class="cards-container">
+    <div class="card">
+      <div class="card-icon" data-lucide="award"></div>
+      <div class="card-title">Medalhas</div>
+      <div class="card-content">Você conquistou 3 novas medalhas este mês!</div>
+    </div>
+    <div class="card">
+      <div class="card-icon" data-lucide="book-open"></div>
+      <div class="card-title">Trilha de Aprendizado</div>
+      <div class="card-content">Complete 5 tarefas para desbloquear o próximo nível.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon" data-lucide="activity"></div>
+      <div class="card-title">Desempenho</div>
+      <div class="card-content">Seu desempenho em Matemática subiu 15%!</div>
+    </div>
+  </div>
+
+  <!-- 🎯 Gráfico -->
+  <canvas id="graficoDesempenho"></canvas>
+
+  <!-- ⏰ Pomodoro -->
+  <div id="pomodoro">
+    <span id="tempoPomodoro">25:00</span><br>
+    <div class="pomodoro-btn-group">
+      <button onclick="iniciarPomodoro()">Iniciar</button>
+      <button onclick="pausarPomodoro()">Pausar</button>
+      <button onclick="resetarPomodoro()">Resetar</button>
+    </div>
+  </div>
+
+  <!-- 📘 Apostilas por Matéria -->
+  <section>
+    <h2>📘 Apostilas por Matéria</h2>
+    <div id="materiasGrid"></div>
+  </section>
+
+  <!-- 📅 Estudo Diário com IA -->
+  <section>
+    <h2>📅 Estudo Diário com IA</h2>
+    <div id="estudoDiarioContainer" class="cards-container"></div>
+  </section>
+
+  <!-- 🏆 Mural de Conquistas -->
+  <section>
+    <h2>🏆 Mural de Conquistas</h2>
+    <ul id="listaConquistas"></ul>
+  </section>
+
+  <!-- 📊 Resumo do Dia -->
+  <section>
+    <h2>📊 Resumo do Dia</h2>
+    <p id="resumoDiario">Carregando...</p>
+    <button id="btnDetalhesResumo">Detalhar Resumo</button>
+    <div id="resumoExpandido" style="display:none;"></div>
+  </section>
+
+  <!-- 🎯 Meta de Estudo de Hoje -->
+  <section>
+    <h2>🎯 Meta de Estudo de Hoje</h2>
+    <p id="metaEstudoTexto">Carregando...</p>
+    <button id="btnConcluirMeta">Concluir Meta</button>
+  </section>
+
+  <!-- 📈 Progresso Geral -->
+  <section>
+    <h2>📈 Seu Progresso Geral</h2>
+    <p id="progressoGeralTexto">Carregando...</p>
+  </section>
+
+  <!-- 🤖 Sugestões da IA -->
+  <section>
+    <h2>🤖 Sugestões da IA</h2>
+    <ul id="sugestoesIA"></ul>
+  </section>
+
+  <!-- 📆 Próximas Provas -->
+  <section>
+    <h2>📆 Próximas Provas</h2>
+    <ul id="provasGrid"></ul>
+  </section>
+
+  <!-- ✅ Script de lógica do painel -->
+  <script src="/static/js/script_dashboard.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

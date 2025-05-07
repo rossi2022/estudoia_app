@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz EstudoIA</title>
+  <link rel="stylesheet" href="/static/styles/style.css" />
+</head>
+<body>
+  <header>
+    <h1 style="color:#e74c3c">Quiz Rápido</h1>
+    <button id="logout-btn" style="background-color:#e67e22;color:white;border:none;padding:8px 12px;border-radius:4px;">Logout</button>
+  </header>
+
+  <main>
+    <div id="quiz-container">
+      <!-- Cards de perguntas e inputs aparecerão aqui dinamicamente -->
+    </div>
+  </main>
+
+  <!-- 🔊 Áudio de clique -->
+  <audio id="click-sound" src="/static/sounds/click.mp3" preload="auto"></audio>
+
+  <!-- Define a URL base da API -->
+  <script>
+    window.API_BASE_URL = `${window.location.origin}/api`;
+  </script>
+
+  <!-- Scripts do quiz e logout -->
+  <script src="/static/js/script_logout.js"></script>
+  <script src="/static/js/script_quiz.js"></script>
+</body>
+</html>
+
+

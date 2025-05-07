@@ -14,7 +14,7 @@ router = APIRouter(
     tags=["perguntas"]
 )
 
-# ✅ Criar nova pergunta
+# 🔹 Criar nova pergunta
 @router.post(
     "/criar",
     response_model=PerguntaOut,
@@ -32,7 +32,7 @@ def criar_pergunta(pergunta: PerguntaCreate, db: Session = Depends(get_db)):
     db.refresh(nova)
     return nova
 
-# ✅ Listar perguntas (filtros opcionais)
+# 🔹 Listar perguntas (com filtros opcionais)
 @router.get(
     "/",
     response_model=List[PerguntaOut],
@@ -50,7 +50,7 @@ def listar_perguntas(
         query = query.filter(Pergunta.dificuldade == dificuldade)
     return query.all()
 
-# ✅ Obter uma pergunta aleatória
+# 🔹 Obter pergunta aleatória
 @router.get(
     "/aleatoria",
     response_model=PerguntaOut,
@@ -61,6 +61,8 @@ def obter_pergunta_aleatoria(db: Session = Depends(get_db)):
     if not pergunta:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Nenhuma pergunta encontrada")
     return pergunta
+
+
 
 
 

@@ -1,0 +1,184 @@
+/* ✅ Estilo global atualizado */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background: linear-gradient(to bottom right, #7F7FD5, #86A8E7, #91EAE4);
+  padding: 20px;
+  color: #333;
+  line-height: 1.6;
+}
+
+h1, h2 {
+  text-align: center;
+  margin: 20px 0;
+  color: #3F51B5;
+}
+
+.cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.card, .quiz-card {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover, .quiz-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
+.card-icon {
+  width: 32px;
+  height: 32px;
+  margin-bottom: 12px;
+  color: #5C6BC0;
+}
+
+.card-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #303F9F;
+}
+
+.card-content {
+  font-size: 14px;
+  color: #555;
+}
+
+#graficoDesempenho {
+  width: 100%;
+  max-width: 650px;
+  margin: 40px auto;
+}
+
+/* Pomodoro */
+#pomodoro {
+  text-align: center;
+  background-color: #fafafa;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+#tempoPomodoro {
+  font-size: 48px;
+  font-weight: bold;
+  color: #d32f2f;
+  margin-bottom: 15px;
+}
+
+/* ✅ Animação pulse */
+#tempoPomodoro.pulse {
+  animation: pulse-animation 0.3s ease-in-out;
+}
+
+@keyframes pulse-animation {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+.pomodoro-btn-group button {
+  background-color: #5C6BC0;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin: 6px;
+  font-size: 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.pomodoro-btn-group button:hover {
+  background-color: #3F51B5;
+}
+
+/* ✅ Botões das matérias lado a lado */
+#materiasGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+}
+
+.botao-materia {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: none;
+  background-color: #E8EAF6;
+  padding: 16px;
+  border-radius: 12px;
+  width: 120px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.botao-materia:hover {
+  background-color: #C5CAE9;
+  transform: scale(1.05);
+}
+
+.botao-materia img {
+  margin-bottom: 10px;
+}
+
+section {
+  margin-top: 40px;
+  text-align: center;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+button.btn-concluir,
+#btnDetalhesResumo,
+#btnConcluirMeta {
+  background-color: #5C6BC0;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  margin-top: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+button.btn-concluir:hover,
+#btnDetalhesResumo:hover,
+#btnConcluirMeta:hover {
+  background-color: #3F51B5;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+
+

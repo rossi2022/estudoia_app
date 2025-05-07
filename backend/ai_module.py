@@ -1,5 +1,3 @@
-# backend/ai_module.py
-
 import openai
 import os
 from dotenv import load_dotenv
@@ -178,9 +176,26 @@ def gerar_timeline(periodo: str, eventos: int) -> List[dict]:
     }
     return exemplos.get(periodo, [])[:eventos]
 
-
-
-
+# 🔹 Função para gerar agenda de estudos inteligente
+def gerar_agenda_estudos(resumo: str) -> str:
+    try:
+        prompt = (
+            "Você é um orientador educacional. Com base nesse desempenho:\n"
+            f"{resumo}\n\nMonte uma agenda de estudos para o aluno com foco nas matérias com mais dificuldade. "
+            "Inclua pausas, tempo para leitura, caligrafia e revisão."
+        )
+        resposta = openai.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "Você monta agendas de estudo inteligentes para alunos do ensino médio."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,
+            max_tokens=500
+        )
+        return resposta.choices[0].message.content.strip()
+    except Exception as e:
+        return f"Erro ao gerar agenda de estudos: {str(e)}"
 
 
 

@@ -1,5 +1,3 @@
-# File: backend/routers/agenda_provas.py
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from backend.db import get_db
@@ -7,7 +5,7 @@ from backend.database.models import Prova, AlertaProva
 from datetime import datetime, timedelta
 
 router = APIRouter(
-    prefix="/provas",
+    prefix="/agenda-provas",  # 🔁 atualizado de "/provas" para "/agenda-provas"
     tags=["Agenda de Provas"]
 )
 
@@ -58,8 +56,8 @@ def criar_prova(dados: dict, db: Session = Depends(get_db)):
     }
 
 # 📚 Listar agenda de provas de um aluno
-@router.get("/agenda/{aluno_id}")
-def listar_agenda(aluno_id: int, db: Session = Depends(get_db)):
+@router.get("/{aluno_id}")
+def listar_agenda(aluno_id: int, db: Session = Depends(get_db)):  # 🔁 rota agora responde em /agenda-provas/{aluno_id}
     provas = db.query(Prova).filter(Prova.aluno_id == aluno_id).all()
     if not provas:
         raise HTTPException(status_code=404, detail="Nenhuma prova agendada para este aluno.")

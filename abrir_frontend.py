@@ -1,25 +1,26 @@
-import http.server
-import socketserver
-import threading
+# abrir_frontend.py
+import subprocess
 import webbrowser
+import time
 import os
 
-PORT = 5500
-DIR = os.path.join(os.path.dirname(__file__), "frontend")
+# Caminho para o diretório raiz do projeto (ajuste se necessário)
+diretorio_projeto = os.path.dirname(os.path.abspath(__file__))
 
-class Handler(http.server.SimpleHTTPRequestHandler):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, directory=DIR, **kwargs)
+# Comando para iniciar o backend com Uvicorn
+comando_backend = ["uvicorn", "backend.main:app", "--reload"]
 
-def abrir_navegador():
-    url = f"http://127.0.0.1:{PORT}/index.html"
-    webbrowser.open(url)
+# Função principal
+def iniciar_tudo():
+    print("Iniciando backend...")
+    subprocess.Popen(comando_backend, cwd=diretorio_projeto)
+    
+    print("Aguardando o backend iniciar...")
+    time.sleep(3)  # aguarda o backend estar no ar
 
-def iniciar_servidor():
-    with socketserver.TCPServer(("", PORT), Handler) as httpd:
-        print(f"Servidor rodando em http://127.0.0.1:{PORT}")
-        abrir_navegador()
-        httpd.serve_forever()
+    print("Abrindo navegador na rota do frontend...")
+    webbrowser.open("http://127.0.0.1:8000")  # ou dashboard se preferir
 
 if __name__ == "__main__":
-    threading.Thread(target=iniciar_servidor).start()
+    iniciar_tudo()
+
