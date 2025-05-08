@@ -1,4 +1,4 @@
-/* ✅ Estilo global atualizado */
+/* ✅ Estilo global */
 * {
   margin: 0;
   padding: 0;
@@ -13,172 +13,73 @@ body {
   line-height: 1.6;
 }
 
-h1, h2 {
-  text-align: center;
-  margin: 20px 0;
-  color: #3F51B5;
-}
-
-.cards-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  margin-bottom: 40px;
-}
-
-.card, .quiz-card {
-  background: #ffffff;
-  padding: 20px;
-  border-radius: 16px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.card:hover, .quiz-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
-}
-
-.card-icon {
-  width: 32px;
-  height: 32px;
-  margin-bottom: 12px;
-  color: #5C6BC0;
-}
-
-.card-title {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: #303F9F;
-}
-
-.card-content {
-  font-size: 14px;
-  color: #555;
-}
-
-#graficoDesempenho {
-  width: 100%;
-  max-width: 650px;
-  margin: 40px auto;
-}
-
-/* Pomodoro */
-#pomodoro {
-  text-align: center;
-  background-color: #fafafa;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-#tempoPomodoro {
-  font-size: 48px;
-  font-weight: bold;
-  color: #d32f2f;
-  margin-bottom: 15px;
-}
-
-/* ✅ Animação pulse */
-#tempoPomodoro.pulse {
-  animation: pulse-animation 0.3s ease-in-out;
-}
-
-@keyframes pulse-animation {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.08); }
-  100% { transform: scale(1); }
-}
-
-.pomodoro-btn-group button {
-  background-color: #5C6BC0;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  margin: 6px;
-  font-size: 16px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.pomodoro-btn-group button:hover {
-  background-color: #3F51B5;
-}
-
-/* ✅ Botões das matérias lado a lado */
-#materiasGrid {
+.login-container {
   display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  max-width: 950px;
+  width: 90%;
+  margin: auto;
+  margin-top: 50px;
+}
+
+.login-image {
+  flex: 1;
+  background-color: #e8eaf6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.login-image img {
+  max-width: 100%;
+  height: auto;
+}
+
+.login-form {
+  flex: 1;
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
   justify-content: center;
 }
 
-.botao-materia {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border: none;
-  background-color: #E8EAF6;
-  padding: 16px;
-  border-radius: 12px;
-  width: 120px;
-  cursor: pointer;
-  transition: background 0.3s ease, transform 0.3s ease;
-}
-
-.botao-materia:hover {
-  background-color: #C5CAE9;
-  transform: scale(1.05);
-}
-
-.botao-materia img {
-  margin-bottom: 10px;
-}
-
-section {
-  margin-top: 40px;
+.login-form h1 {
+  margin-bottom: 1rem;
+  font-size: 2rem;
+  color: #5C6BC0;
   text-align: center;
 }
 
-ul {
-  list-style: none;
-  padding: 0;
+.login-form input {
+  margin-bottom: 1rem;
+  padding: 0.8rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
 }
 
-button.btn-concluir,
-#btnDetalhesResumo,
-#btnConcluirMeta {
+.login-form button {
+  padding: 0.8rem;
+  font-size: 1rem;
   background-color: #5C6BC0;
   color: white;
   border: none;
-  padding: 10px 16px;
-  margin-top: 8px;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: background-color 0.3s;
 }
 
-button.btn-concluir:hover,
-#btnDetalhesResumo:hover,
-#btnConcluirMeta:hover {
+.login-form button:hover {
   background-color: #3F51B5;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-  
-  
-  
-
-
+#login-error {
+  color: #c0392b;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 1rem;
+}
