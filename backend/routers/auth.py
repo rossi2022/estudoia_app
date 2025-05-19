@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session
 from jose import jwt
 from datetime import datetime, timedelta
 from backend.db import get_db
-from backend.database.models import Aluno  # ✅ Corrigido: import da pasta database
-from backend.utils.security import verify_password, criar_token  # ✅ Usa utilitários já centralizados
+from backend.database.models import Aluno
+from backend.utils.security import verify_password, criar_token
 
 # =============================
 # 🔹 Inicialização do roteador
@@ -35,6 +35,11 @@ class LoginResponse(BaseModel):
 def login(data: LoginData, db: Session = Depends(get_db)):
     aluno = db.query(Aluno).filter(Aluno.email == data.email).first()
 
+    # 🔍 Prints de debug colocados dentro da função
+    print("📥 Senha digitada:", data.senha)
+    print("🔒 Senha no banco:", aluno.senha if aluno else "Nenhum aluno")
+    print("✅ Comparação:", verify_password(data.senha, aluno.senha) if aluno else "Aluno inexistente")
+
     if not aluno or not verify_password(data.senha, aluno.senha):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -43,7 +48,7 @@ def login(data: LoginData, db: Session = Depends(get_db)):
 
     token = criar_token({
         "sub": aluno.id,
-        "tipo": "aluno"  # ✅ Adicionado para compatibilidade com verificação unificada
+        "tipo": "aluno"
     })
 
     return {
@@ -52,8 +57,6 @@ def login(data: LoginData, db: Session = Depends(get_db)):
         "nome": aluno.nome,
         "token": token
     }
-
-
 
 
 

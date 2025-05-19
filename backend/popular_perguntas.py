@@ -1,3 +1,9 @@
+# backend/popular_perguntas.py
+
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 from backend.db import SessionLocal
 from backend.database.models import Pergunta
 from backend.perguntas_fixas import perguntas_fixas
@@ -5,20 +11,18 @@ from backend.perguntas_fixas import perguntas_fixas
 def popular_perguntas():
     db = SessionLocal()
     for p in perguntas_fixas:
-        pergunta_existente = db.query(Pergunta).filter_by(
+        existe = db.query(Pergunta).filter_by(
             materia=p["materia"],
             enunciado=p["enunciado"]
         ).first()
-
-        if not pergunta_existente:
-            nova_pergunta = Pergunta(
+        if not existe:
+            nova = Pergunta(
                 materia=p["materia"],
                 enunciado=p["enunciado"],
                 resposta_correta=p["resposta_correta"],
                 dificuldade=p["dificuldade"]
             )
-            db.add(nova_pergunta)
-
+            db.add(nova)
     db.commit()
     db.close()
     print("✅ Perguntas fixas inseridas com sucesso!")

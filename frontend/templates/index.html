@@ -17,13 +17,25 @@
     <div class="login-form">
       <h1>EstudoIA <span>🧠</span></h1>
 
+      <!-- Formulário de Login -->
       <form id="login-form">
         <input type="email" id="email" placeholder="Seu e-mail" required />
         <input type="password" id="senha" placeholder="Sua senha" required />
         <button type="submit">Entrar</button>
       </form>
-
       <p id="login-error"></p>
+
+      <hr style="margin: 30px 0;">
+
+      <!-- Formulário de Cadastro -->
+      <form id="formCadastro">
+        <input type="text" id="nome" placeholder="Nome completo" required />
+        <input type="email" id="cadastro-email" placeholder="E-mail" required />
+        <input type="password" id="cadastro-senha" placeholder="Senha" required />
+        <input type="file" id="foto" accept="image/*" required />
+        <button type="submit">Cadastrar</button>
+        <p id="mensagemErro" style="color: red; margin-top: 10px;"></p>
+      </form>
     </div>
   </div>
 
@@ -31,5 +43,6 @@
     window.API_BASE_URL = window.location.origin + "/api";
   </script>
   <script src="/static/js/script_login.js"></script>
+  <script src="/static/js/script_cadastro.js"></script>
 </body>
 </html>

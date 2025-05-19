@@ -1,0 +1,11 @@
+Validação de campos no frontend (ex.: impedir cadastro com senha fraca ou sem imagem).
+
+Tratamento de erros na UI, exibindo mensagens reais vindas da API.
+
+Adicionar endpoint de upload de imagem e integração com storage.
+
+Melhorar a documentação OpenAPI e exemplos nos schemas.
+
+Criar um script de inicialização (makefile ou docker-compose) para facilitar testes e deploy.
+
+Testes E2E com Selenium ou Playwright (opcional no momento).

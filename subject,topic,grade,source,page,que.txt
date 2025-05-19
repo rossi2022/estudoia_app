@@ -1,0 +1,4 @@
+subject,topic,grade,source,page,question_text,question_type,difficulty,image_path
+MATEMATICA,Álgebra,9º Ano,"Apostila Positivo - Vol 2",15,"Resolva: 2x + 5 = 15",Múltipla Escolha,Fácil,algebra_15.jpg
+HISTORIA,Brasil Colônia,8º Ano,"Apostila Bernoulli",42,"Explique o ciclo do ouro no Brasil Colonial",Dissertativa,Médio,ouro_42.jpg
+BIOLOGIA,Células,1º EM,"Apostila Sistema Elite",78,"Qual a função das mitocôndrias?",Múltipla Escolha,Difícil,celulas_78.jpg

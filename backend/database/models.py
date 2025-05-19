@@ -1,22 +1,25 @@
-from sqlalchemy import Column, Integer, String, Text, Date, DateTime, Float, ForeignKey
-from sqlalchemy.orm import relationship
-from backend.db import Base  # ✅ CORRETO
-from datetime import date, datetime
+# backend/database/models.py
 
-# ===============================
-# 📌 MODELO: Aluno
-# ===============================
+from datetime import date, datetime
+from sqlalchemy import Column, Date, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy.orm import relationship
+
+# Importa o Base único, definido em backend/db.py
+from backend.db import Base  
+
+# === daqui em diante, defina só as suas classes que herdam de Base ===
 class Aluno(Base):
     __tablename__ = "alunos"
+    id        = Column(Integer, primary_key=True, index=True)
+    nome      = Column(String, nullable=False)
+    email     = Column(String, unique=True, nullable=False)
+    senha     = Column(String, nullable=False)
+    foto_url  = Column(String, nullable=True)
+    meta_estudo = Column(String, nullable=True)
 
-    id = Column(Integer, primary_key=True, index=True)
-    nome = Column(String, nullable=False)
-    email = Column(String, unique=True, nullable=False)
-    senha = Column(String, nullable=False)
-    foto_url = Column(String, nullable=True)
-    meta_estudo = Column(String, nullable=True)  # ✅ Campo necessário para a meta
+    respostas = relationship("RespostaAluno", back_populates="aluno")
+    # … e o restante das relações …
 
-    respostas = relationship("RespostaAluno", back_populates="aluno", lazy="joined")
     provas = relationship("Prova", back_populates="aluno", lazy="joined")
     notas = relationship("NotaMensal", back_populates="aluno", lazy="joined")
     recompensas = relationship("Recompensa", back_populates="aluno", lazy="joined")
@@ -29,8 +32,6 @@ class Aluno(Base):
     conquistas = relationship("Conquista", back_populates="aluno", lazy="joined")
     resumos = relationship("Resumo", back_populates="aluno", lazy="joined")
     tarefas_estudo = relationship("TarefaEstudo", back_populates="aluno", lazy="joined")
-# (...demais modelos permanecem inalterados...)
-
 
 # ===============================
 # 📌 MODELO: Pergunta
@@ -72,10 +73,9 @@ class NotaMensal(Base):
     materia = Column(String, nullable=False)
     nota = Column(Float, nullable=False)
     mes = Column(String, nullable=False)
-    ano = Column(Integer, default=date.today().year)  # ✅ Adicionado campo "ano"
+    ano = Column(Integer, default=date.today().year)
 
     aluno = relationship("Aluno", back_populates="notas")
-
 
 # ===============================
 # 📌 MODELO: Prova + Questões + Respostas
@@ -101,7 +101,6 @@ class Prova(Base):
             return self.questoes[0].materia
         return "Desconhecida"
 
-
 class QuestaoProva(Base):
     __tablename__ = "questoes_prova"
 
@@ -112,7 +111,6 @@ class QuestaoProva(Base):
     prova = relationship("Prova", back_populates="questoes")
     pergunta = relationship("Pergunta", back_populates="questoes_prova")
     respostas = relationship("RespostaProva", back_populates="questao", cascade="all, delete-orphan")
-
 
 class RespostaProva(Base):
     __tablename__ = "respostas_prova"
@@ -126,7 +124,6 @@ class RespostaProva(Base):
 
     prova = relationship("Prova", back_populates="respostas")
     questao = relationship("QuestaoProva", back_populates="respostas")
-
 
 # ===============================
 # 📌 MODELO: Recompensa
@@ -171,7 +168,7 @@ class HistoricoDesempenho(Base):
 
     aluno = relationship("Aluno", back_populates="historico")
 
-# # ===============================
+# ===============================
 # 📌 MODELO: Trilha de Aprendizado
 # ===============================
 class TrilhaAprendizado(Base):
@@ -183,7 +180,7 @@ class TrilhaAprendizado(Base):
     descricao = Column(String, nullable=True)
     habilidade = Column(String, nullable=False)
     status = Column(String, default="pendente")
-    data_criacao = Column(DateTime, default=datetime.utcnow)  # ✅ atualizado
+    data_criacao = Column(DateTime, default=datetime.utcnow)
 
     aluno = relationship("Aluno", back_populates="trilha")
 
@@ -270,6 +267,7 @@ class Professor(Base):
     nome = Column(String, nullable=False)
     email = Column(String, unique=True, nullable=False)
     senha = Column(String, nullable=False)
+    foto_url = Column(String, nullable=True)  # ✅ Adicione esta linha
 
     provas = relationship("ProvaPersonalizada", back_populates="professor")
     trabalhos = relationship("Trabalho", back_populates="professor")
@@ -372,11 +370,6 @@ class Apostila(Base):
     capitulo = Column(String, nullable=False)
     titulo = Column(String, nullable=False)
     conteudo = Column(Text, nullable=False)
-
-
-
-
- 
 
 
 

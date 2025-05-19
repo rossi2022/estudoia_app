@@ -1,0 +1,53 @@
+# File: .github/workflows/ci.yml
+name: CI — Testes Online & Coverage
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.10, 3.11]
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v3
+
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Instalar dependências
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest requests pytest-cov
+
+      - name: Executar testes locais
+        run: pytest backend/tests -q --cov=backend
+
+      - name: Executar testes “online” contra o deploy
+        env:
+          TEST_PROF_EMAIL: ${{ secrets.TEST_PROF_EMAIL }}
+          TEST_PROF_PASS:  ${{ secrets.TEST_PROF_PASS }}
+        run: pytest tests/test_online_endpoints.py -q
+
+      - name: Publicar relatório de cobertura
+        if: success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: htmlcov/
+
+      - name: Upload cobertura no Codecov
+        if: success()
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.xml
+          fail_ci_if_error: true

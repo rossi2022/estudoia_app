@@ -14,24 +14,31 @@
   <!-- ✅ Fonte do Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
-  <!-- ✅ CSS Externo -->
-  <link rel="stylesheet" href="/static/css/style.css" />
+  <!-- ✅ CSS Externo via Jinja2 -->
+  <link rel="stylesheet" href="{{ url_for('static', path='styles/style.css') }}" />
 </head>
 <body>
 
   <h1>Bem-vindo(a) ao seu Painel de Desempenho 📊</h1>
 
   <div class="cards-container">
+    <!-- Card de Medalhas: agora dinâmico -->
     <div class="card">
       <div class="card-icon" data-lucide="award"></div>
       <div class="card-title">Medalhas</div>
-      <div class="card-content">Você conquistou 3 novas medalhas este mês!</div>
+      <ul id="listaMedalhas" class="card-content">
+        <!-- Será preenchido via JS -->
+      </ul>
     </div>
+
+    <!-- Card de Trilha de Aprendizado permanece estático por enquanto -->
     <div class="card">
       <div class="card-icon" data-lucide="book-open"></div>
       <div class="card-title">Trilha de Aprendizado</div>
       <div class="card-content">Complete 5 tarefas para desbloquear o próximo nível.</div>
     </div>
+
+    <!-- Card de Desempenho permanece estático por enquanto -->
     <div class="card">
       <div class="card-icon" data-lucide="activity"></div>
       <div class="card-title">Desempenho</div>
@@ -41,6 +48,21 @@
 
   <!-- 🎯 Gráfico -->
   <canvas id="graficoDesempenho"></canvas>
+
+  <!-- 🔍 Gráficos estáticos de desempenho gerados pelo backend -->
+  <section>
+    <h2>📊 Gráficos de Desempenho</h2>
+    <div class="charts-container">
+      <div class="chart">
+        <h3>Média de Nota por Matéria</h3>
+        <img src="{{ url_for('static', path='charts/media_por_materia.png') }}" alt="Média por Matéria" />
+      </div>
+      <div class="chart">
+        <h3>Histórico de Notas</h3>
+        <img src="{{ url_for('static', path='charts/historico_notas.png') }}" alt="Histórico de Notas" />
+      </div>
+    </div>
+  </section>
 
   <!-- ⏰ Pomodoro -->
   <div id="pomodoro">
@@ -103,13 +125,14 @@
     <ul id="provasGrid"></ul>
   </section>
 
-  <!-- ✅ Script de lógica do painel -->
-  <script src="/static/js/script_dashboard.js"></script>
+  <!-- ✅ Script de lógica do painel via Jinja2 -->
+  <script src="{{ url_for('static', path='js/script_dashboard.js') }}"></script>
   <script>
     lucide.createIcons();  // 🔹 Ativa os ícones do Lucide
   </script>
 </body>
 </html>
+
 
 
 

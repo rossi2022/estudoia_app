@@ -1,48 +1,35 @@
-# backend/utils/avaliador_audio.py
+# File: backend/utils/avaliador_audio.py
 
 import os
-from dotenv import load_dotenv
 from openai import OpenAI
 
-# 🔐 Carrega a chave da OpenAI do .env
-load_dotenv()
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# Carrega a chave da variável de ambiente, não o valor literal
+api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
+    raise RuntimeError("Missing OPENAI_API_KEY environment variable")
 
-# ✅ Função compatível com import: avaliar_leitura_voz
-def avaliar_leitura_voz(caminho_audio: str) -> str:
-    try:
-        # 📤 Lê o conteúdo do arquivo em bytes
-        with open(caminho_audio, "rb") as f:
-            audio_bytes = f.read()
+client = OpenAI(api_key=api_key)
 
-        # ✅ Transcreve com Whisper
-        transcript = client.audio.transcriptions.create(
-            model="whisper-1",
-            file=audio_bytes,
-            response_format="text"
-        )
+def avaliar_leitura_voz(audio_path: str) -> dict:
+    """
+    Avalia a qualidade da leitura em voz alta de um arquivo de áudio.
+    Retorna um dicionário com pontuação e feedback.
+    """
+    transcription = client.audio.transcriptions.create(
+        file=open(audio_path, "rb"),
+        model="whisper-1"
+    )
 
-        texto_transcrito = transcript.strip()
+    feedback = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "Você é um avaliador de leitura em voz alta."},
+            {"role": "user", "content": f"Transcrição: {transcription.text}. Forneça feedback sobre pronúncia e fluidez."}
+        ]
+    )
 
-        # 🧠 Gera avaliação com IA
-        prompt = (
-            f"O seguinte texto foi lido por um aluno:\n\n\"{texto_transcrito}\"\n\n"
-            "Avalie a fluência, entonação e clareza da leitura como se fosse um professor de português. "
-            "Seja gentil e motivador. Dê uma nota de 0 a 10 e um comentário construtivo."
-        )
-
-        resposta = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "Você é um avaliador de leitura em voz alta para alunos do ensino médio."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.7,
-            max_tokens=300
-        )
-
-        return resposta.choices[0].message.content.strip()
-
-    except Exception as e:
-        return f"Erro ao avaliar áudio: {str(e)}"
+    return {
+        "transcription": transcription.text,
+        "feedback": feedback.choices[0].message.content
+    }
 

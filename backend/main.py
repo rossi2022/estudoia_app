@@ -1,10 +1,20 @@
+# File: backend/main.py
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.responses import HTMLResponse
 from fastapi.openapi.utils import get_openapi
 from fastapi.security import HTTPBearer
+
+import os
+from pathlib import Path
+from backend.db import engine
+from backend.database.models import Base
+
+# 🔧 Cria todas as tabelas no banco ao iniciar
+Base.metadata.create_all(bind=engine)
 
 # 📌 Importação das rotas
 from backend.routers import (
@@ -55,8 +65,9 @@ from backend.routers import (
     trilhas_estudo,
     voz,
     materias,
-    apostilas,  # ✅ nova rota (SEM parâmetro) deve vir ANTES das rotas com parâmetro
-    aluno       # ✅ rota COM parâmetro — DEVE ficar por último
+    apostilas,
+    aluno,
+    trabalhos
 )
 
 app = FastAPI()
@@ -72,10 +83,7 @@ def custom_openapi():
         routes=app.routes,
     )
     openapi_schema["components"]["securitySchemes"] = {
-        "HTTPBearer": {
-            "type": "http",
-            "scheme": "bearer"
-        }
+        "HTTPBearer": {"type": "http", "scheme": "bearer"}
     }
     for path in openapi_schema["paths"].values():
         for method in path.values():
@@ -85,7 +93,7 @@ def custom_openapi():
 
 app.openapi = custom_openapi
 
-# ▪️ CORS
+# 🌐 CORS
 origins = ["http://localhost:8000", "http://127.0.0.1:8000"]
 app.add_middleware(
     CORSMiddleware,
@@ -95,22 +103,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ▪️ Arquivos estáticos e templates
-app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
-templates = Jinja2Templates(directory="frontend")
+# 🗂️ Arquivos estáticos e templates
+BASE_DIR = Path(__file__).resolve().parent.parent
+static_path = BASE_DIR / "frontend" / "static"
+templates_path = BASE_DIR / "frontend" / "templates"
 
-# ▪️ Páginas HTML
+app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
+templates = Jinja2Templates(directory=str(templates_path))
+
+# 🌐 Páginas HTML
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+@app.get("/index.html", response_class=HTMLResponse)
+async def index_html(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/professor_login", response_class=HTMLResponse)
 async def professor_login(request: Request):
     return templates.TemplateResponse("professor_login.html", {"request": request})
-
-@app.get("/index.html", response_class=HTMLResponse)
-async def index_html(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard(request: Request):
@@ -136,7 +148,7 @@ async def painel_professor(request: Request):
 async def favicon():
     return HTMLResponse(content="", status_code=204)
 
-# ▪️ Inclusão das rotas da API
+# 📦 Inclusão das rotas da API
 app.include_router(agenda.router, prefix="/api")
 app.include_router(agenda_provas.router, prefix="/api")
 app.include_router(ai.router, prefix="/api")
@@ -184,15 +196,9 @@ app.include_router(trilha.router, prefix="/api")
 app.include_router(trilhas_estudo.router, prefix="/api")
 app.include_router(voz.router, prefix="/api")
 app.include_router(materias.router, prefix="/api")
-app.include_router(apostilas.router, prefix="/api")  # ✅ NOVA ROTA — ANTES DO "aluno"
-app.include_router(aluno.router, prefix="/api")       # ✅ ÚLTIMA — pois pode ter /{aluno_id}
-
-
-
-
-
-
-
+app.include_router(apostilas.router, prefix="/api")
+app.include_router(aluno.router, prefix="/api")
+app.include_router(trabalhos.router, prefix="/api")
 
 
 

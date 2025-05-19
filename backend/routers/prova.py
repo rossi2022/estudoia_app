@@ -1,6 +1,6 @@
 # File: backend/routers/prova.py
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime
@@ -46,7 +46,7 @@ class QuestaoOut(BaseModel):
         from_attributes = True
 
 # ✅ Criar prova
-@router.post("/", response_model=ProvaOut)
+@router.post("/", response_model=ProvaOut, status_code=status.HTTP_201_CREATED)
 def criar_prova(prova: ProvaCreate, db: Session = Depends(get_db)):
     nova_prova = Prova(
         aluno_id=prova.aluno_id,
@@ -60,10 +60,27 @@ def criar_prova(prova: ProvaCreate, db: Session = Depends(get_db)):
     return nova_prova
 
 # ✅ Adicionar questão à prova
-@router.post("/questoes", response_model=QuestaoOut)
+@router.post("/questoes", response_model=QuestaoOut, status_code=status.HTTP_200_OK)
 def adicionar_questao(questao: QuestaoCreate, db: Session = Depends(get_db)):
-    nova_questao = QuestaoProva(**questao.dict())
+    # Verifica existência da prova
+    prova = db.query(Prova).filter(Prova.id == questao.prova_id).first()
+    if not prova:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Prova não encontrada")
+
+    nova_questao = QuestaoProva(
+        prova_id=questao.prova_id,
+        pergunta_id=questao.pergunta_id
+    )
     db.add(nova_questao)
+    db.commit()
+    db.refresh(nova_questao)
+    return nova_questao
+
+# 🔸 Listar todas as provas\@router.get("/", response_model=List[ProvaOut], status_code=status.HTTP_200_OK)
+def listar_provas(db: Session = Depends(get_db)):
+    provas = db.query(Prova).all()
+    return provas
+
 
 
 

@@ -2,39 +2,31 @@
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-import os
 
-# 🔹 Caminho do banco de dados (por padrão, SQLite local)
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./estudoia.db")
+# 1) URL do seu banco — ajuste se não for SQLite
+SQLALCHEMY_DATABASE_URL = "sqlite:///./db.sqlite3"
 
-# 🔹 Criação do engine para conectar ao SQLite
+# 2) Engine
+#    - no SQLite é preciso desconectar a thread checagem
 engine = create_engine(
-    DATABASE_URL,
-    connect_args={"check_same_thread": False}  # necessário para SQLite em threads
+    SQLALCHEMY_DATABASE_URL,
+    connect_args={"check_same_thread": False}
 )
 
-# 🔹 Sessão de banco (ORM)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# 3) SessionLocal factory
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine
+)
 
-# 🔹 Classe base para modelos declarativos
+# 4) ÚNICO ponto de criação do Base
 Base = declarative_base()
 
-# 🔹 Criação das tabelas do banco
-def create_db_tables():
-    from backend.database import models  # ✅ importa os modelos para registrar
-    Base.metadata.create_all(bind=engine)
-
-# 🔹 Dependência do FastAPI para injetar a sessão do banco
+# 5) Dependência do FastAPI para injetar a sessão
 def get_db():
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
-
-
-
-
-
-
-
