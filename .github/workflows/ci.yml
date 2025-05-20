@@ -1,24 +1,24 @@
 # File: .github/workflows/ci.yml
-name: CI — Testes Online & Coverage
+name: CI & CD
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
 
 jobs:
-  build-and-test:
+  test-and-deploy:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.10, 3.11]
+        python-version: [3.11]
 
     steps:
-      - name: Checkout do código
+      - name: Checkout do repositório
         uses: actions/checkout@v3
 
-      - name: Setup Python ${{ matrix.python-version }}
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
@@ -26,28 +26,21 @@ jobs:
       - name: Instalar dependências
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pytest requests pytest-cov
+          pip install -r requirements.txt pytest requests pytest-cov python-dotenv flyctl
 
-      - name: Executar testes locais
-        run: pytest backend/tests -q --cov=backend
+      - name: Testes unitários
+        run: pytest backend/tests --cov=backend
 
-      - name: Executar testes “online” contra o deploy
+      - name: Testes end-to-end online
         env:
           TEST_PROF_EMAIL: ${{ secrets.TEST_PROF_EMAIL }}
           TEST_PROF_PASS:  ${{ secrets.TEST_PROF_PASS }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: pytest tests/test_online_endpoints.py -q
 
-      - name: Publicar relatório de cobertura
-        if: success()
-        uses: actions/upload-artifact@v3
-        with:
-          name: coverage-report
-          path: htmlcov/
-
-      - name: Upload cobertura no Codecov
-        if: success()
-        uses: codecov/codecov-action@v3
-        with:
-          files: ./coverage.xml
-          fail_ci_if_error: true
+      - name: Deploy no Fly.io
+        if: github.ref == 'refs/heads/main'
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          flyctl deploy --config fly.toml --remote-only
