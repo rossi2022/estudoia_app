@@ -9,7 +9,7 @@ Base = declarative_base()
 
 # 🔧 Configuração do banco de dados (via DATABASE_URL ou SQLite local)
 SQLALCHEMY_DATABASE_URL = os.getenv(
-    "DATABASE_URL", 
+    "DATABASE_URL",
     "sqlite:///./estudoia.db"
 )
 
@@ -22,15 +22,15 @@ engine = create_engine(
 
 # 🔧 Sessão para injeção nas rotas
 SessionLocal = sessionmaker(
-    autocommit=False, 
-    autoflush=False, 
+    autocommit=False,
+    autoflush=False,
     bind=engine
 )
 
-# 🔧 Importa os modelos para o metadata
+# 🔧 Importa todos os seus modelos para o metadata
 import backend.database.models  # noqa: F401
 
-# 🔧 Cria todas as tabelas no banco ao iniciar
+# 🔧 Cria todas as tabelas assim que este módulo for importado
 Base.metadata.create_all(bind=engine)
 
 def get_db():
@@ -43,5 +43,6 @@ def get_db():
         yield db
     finally:
         db.close()
+
 
 
