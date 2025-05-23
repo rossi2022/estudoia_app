@@ -1,22 +1,26 @@
 # File: backend/main.py
 
+import os
+from pathlib import Path
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.openapi.utils import get_openapi
-from fastapi.security import HTTPBearer
 
-import os
-from pathlib import Path
-from backend.db import engine
-from backend.database.models import Base
+# —————————————————————————————————————————————————————————————
+# Banco de dados e Base declarativa (via backend/db.py)
+# —————————————————————————————————————————————————————————————
+from backend.db import engine, Base, get_db
 
-# 🔧 Cria todas as tabelas no banco ao iniciar
+# Garante que todas as tabelas serão criadas antes de qualquer request
 Base.metadata.create_all(bind=engine)
 
-# 📌 Importação das rotas
+# —————————————————————————————————————————————————————————————
+# Importa todos os routers
+# —————————————————————————————————————————————————————————————
 from backend.routers import (
     agenda,
     agenda_provas,
@@ -70,15 +74,78 @@ from backend.routers import (
     trabalhos
 )
 
-app = FastAPI()
+all_routers = [
+    agenda.router,
+    agenda_provas.router,
+    ai.router,
+    auth.router,
+    auth_professor.router,
+    caligrafia.router,
+    conquistas.router,
+    escrita.router,
+    estudo.router,
+    estudos.router,
+    estudo_diario.router,
+    estudo_guiado.router,
+    explicacao.router,
+    graficos.router,
+    historico_estudos.router,
+    leitura_voz.router,
+    literatura.router,
+    medalhas.router,
+    mensagens.router,
+    motivacao.router,
+    neuroeducacao.router,
+    notas.router,
+    notas_mensais.router,
+    notificacoes.router,
+    perguntas.router,
+    perguntas_personalizadas.router,
+    personalizadas.router,
+    planejamento.router,
+    professores.router,
+    progresso.router,
+    prova.router,
+    provas_trabalhos.router,
+    quiz.router,
+    recompensas.router,
+    reforco.router,
+    relatorio.router,
+    relatorio_pdf.router,
+    responder.router,
+    responder_prova.router,
+    respostas.router,
+    resumos.router,
+    tarefas_estudo.router,
+    timeline.router,
+    trilha.router,
+    trilhas_estudo.router,
+    voz.router,
+    materias.router,
+    apostilas.router,
+    aluno.router,
+    trabalhos.router,
+]
 
-# 🔒 Segurança no Swagger
+# —————————————————————————————————————————————————————————————
+# Configura FastAPI com docs sob /api
+# —————————————————————————————————————————————————————————————
+app = FastAPI(
+    title="EstudoIA API",
+    version="1.0.0",
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+    openapi_url="/api/openapi.json"
+)
+
+
+# Custom OpenAPI para exigir Bearer em todas as rotas de API
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
     openapi_schema = get_openapi(
-        title="EstudoIA API",
-        version="1.0.0",
+        title=app.title,
+        version=app.version,
         description="API do sistema EstudoIA",
         routes=app.routes,
     )
@@ -93,7 +160,9 @@ def custom_openapi():
 
 app.openapi = custom_openapi
 
-# 🌐 CORS
+# —————————————————————————————————————————————————————————————
+# CORS (frontend local)
+# —————————————————————————————————————————————————————————————
 origins = ["http://localhost:8000", "http://127.0.0.1:8000"]
 app.add_middleware(
     CORSMiddleware,
@@ -103,7 +172,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 🗂️ Arquivos estáticos e templates
+# —————————————————————————————————————————————————————————————
+# Monta arquivos estáticos e templates Jinja
+# —————————————————————————————————————————————————————————————
 BASE_DIR = Path(__file__).resolve().parent.parent
 static_path = BASE_DIR / "frontend" / "static"
 templates_path = BASE_DIR / "frontend" / "templates"
@@ -111,7 +182,10 @@ templates_path = BASE_DIR / "frontend" / "templates"
 app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
 templates = Jinja2Templates(directory=str(templates_path))
 
-# 🌐 Páginas HTML
+
+# —————————————————————————————————————————————————————————————
+# Páginas HTML do frontend
+# —————————————————————————————————————————————————————————————
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
@@ -128,16 +202,8 @@ async def professor_login(request: Request):
 async def dashboard(request: Request):
     return templates.TemplateResponse("dashboard.html", {"request": request})
 
-@app.get("/dashboard.html", response_class=HTMLResponse)
-async def dashboard_html(request: Request):
-    return templates.TemplateResponse("dashboard.html", {"request": request})
-
 @app.get("/quiz", response_class=HTMLResponse)
 async def quiz_page(request: Request):
-    return templates.TemplateResponse("quiz.html", {"request": request})
-
-@app.get("/quiz.html", response_class=HTMLResponse)
-async def quiz_html(request: Request):
     return templates.TemplateResponse("quiz.html", {"request": request})
 
 @app.get("/painel_professor", response_class=HTMLResponse)
@@ -146,61 +212,15 @@ async def painel_professor(request: Request):
 
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon():
-    return HTMLResponse(content="", status_code=204)
-
-# 📦 Inclusão das rotas da API
-app.include_router(agenda.router, prefix="/api")
-app.include_router(agenda_provas.router, prefix="/api")
-app.include_router(ai.router, prefix="/api")
-app.include_router(auth.router, prefix="/api")
-app.include_router(auth_professor.router, prefix="/api")
-app.include_router(caligrafia.router, prefix="/api")
-app.include_router(conquistas.router, prefix="/api")
-app.include_router(escrita.router, prefix="/api")
-app.include_router(estudo.router, prefix="/api")
-app.include_router(estudos.router, prefix="/api")
-app.include_router(estudo_diario.router, prefix="/api")
-app.include_router(estudo_guiado.router, prefix="/api")
-app.include_router(explicacao.router, prefix="/api")
-app.include_router(graficos.router, prefix="/api")
-app.include_router(historico_estudos.router, prefix="/api")
-app.include_router(leitura_voz.router, prefix="/api")
-app.include_router(literatura.router, prefix="/api")
-app.include_router(medalhas.router, prefix="/api")
-app.include_router(mensagens.router, prefix="/api")
-app.include_router(motivacao.router, prefix="/api")
-app.include_router(neuroeducacao.router, prefix="/api")
-app.include_router(notas.router, prefix="/api")
-app.include_router(notas_mensais.router, prefix="/api")
-app.include_router(notificacoes.router, prefix="/api")
-app.include_router(perguntas.router, prefix="/api")
-app.include_router(perguntas_personalizadas.router, prefix="/api")
-app.include_router(personalizadas.router, prefix="/api")
-app.include_router(planejamento.router, prefix="/api")
-app.include_router(professores.router, prefix="/api")
-app.include_router(progresso.router, prefix="/api")
-app.include_router(prova.router, prefix="/api")
-app.include_router(provas_trabalhos.router, prefix="/api")
-app.include_router(quiz.router, prefix="/api")
-app.include_router(recompensas.router, prefix="/api")
-app.include_router(reforco.router, prefix="/api")
-app.include_router(relatorio.router, prefix="/api")
-app.include_router(relatorio_pdf.router, prefix="/api")
-app.include_router(responder.router, prefix="/api")
-app.include_router(responder_prova.router, prefix="/api")
-app.include_router(respostas.router, prefix="/api")
-app.include_router(resumos.router, prefix="/api")
-app.include_router(tarefas_estudo.router, prefix="/api")
-app.include_router(timeline.router, prefix="/api")
-app.include_router(trilha.router, prefix="/api")
-app.include_router(trilhas_estudo.router, prefix="/api")
-app.include_router(voz.router, prefix="/api")
-app.include_router(materias.router, prefix="/api")
-app.include_router(apostilas.router, prefix="/api")
-app.include_router(aluno.router, prefix="/api")
-app.include_router(trabalhos.router, prefix="/api")
+    return HTMLResponse(status_code=204)
 
 
+# —————————————————————————————————————————————————————————————
+# Monta **todos** os routers sob /api **e** sem prefixo
+# —————————————————————————————————————————————————————————————
+for router in all_routers:
+    app.include_router(router, prefix="/api")
+    app.include_router(router, prefix="")
 
 
 
